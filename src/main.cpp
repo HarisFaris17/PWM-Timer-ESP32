@@ -1,7 +1,12 @@
 #include<Arduino.h>
 #define LED 14
+// the return of timerBegin() is hw_timer_t
+// My_timer used for passing timer information to ther timerAttachInterrupt,timerAlaramWrite and timerAlarmEnable, hence when the timer reached the desired value, the callback function will be evoked
 hw_timer_t *My_timer = NULL;
+
+// this variable used in onTimer to indentify if the onTimer called to change the alarmValue to 6000000 or to 1000000
 boolean change = true;
+
 void IRAM_ATTR onTimer(){
   digitalWrite(LED, !digitalRead(LED));
   timerDetachInterrupt(My_timer);
