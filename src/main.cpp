@@ -48,7 +48,7 @@ void setup() {
   // timerAlarmWrite(myTimer, 1000000, true);
   // timerAlarmEnable(myTimer); //Just Enable
   configTimer();
-  valuePWM(5);
+  valuePWM(255,false);
 }
 void loop() {
   delay(10000);
@@ -57,12 +57,13 @@ void loop() {
 
 void configTimer(){
   myTimer = timerBegin(timer,80,true);
+  Serial.println("Timer configured");
 }
 
 void valuePWM(int pwmVal,bool percent){
   timerAttachInterrupt(myTimer,&changeStatePWM,true);
   if(percent){
-    if(pwmVal<0&&pwmVal>100) {
+    if(pwmVal<0||pwmVal>100) {
       Serial.println("The value for PWM should be beetween 0 and 100");
       Serial.println("As a result, the PWM value will be 50%");
       alarmVal = int(0.5*microSec/PWMFreq);
@@ -73,7 +74,7 @@ void valuePWM(int pwmVal,bool percent){
     }
   }
   else{
-    if(pwmVal<0&&pwmVal>255) {
+    if(pwmVal<0||pwmVal>255) {
       Serial.println("The value for PWM should be beetween 0 and 255");
       Serial.println("As a result, the PWM value will be 50%");
       alarmVal = int(0.5*microSec/PWMFreq);
@@ -83,22 +84,29 @@ void valuePWM(int pwmVal,bool percent){
       Serial.println("Alarm value : "+alarmVal);
     }
   }
+  Serial.println(alarmVal);
   digitalWrite(pwmPin,HIGH);
   state=true;
   timerAlarmWrite(myTimer,alarmVal,true);
   timerAlarmEnable(myTimer);
+  Serial.println("PWM configured");
 }
 
 void IRAM_ATTR changeStatePWM(){
-  digitalWrite(pwmPin,!digitalRead(pwmPin));
+  // Serial.println(digitalRead(pwmPin));
+  timerDetachInterrupt(myTimer);
+  timerAttachInterrupt(myTimer,&changeStatePWM,true);
   if(state){
     timerAlarmWrite(myTimer,alarmVal,true);
+    digitalWrite(pwmPin,HIGH);
     state=false;
   }
   else{
     timerAlarmWrite(myTimer,microSec/PWMFreq-alarmVal,true);
+    digitalWrite(pwmPin,LOW);
     state=true;
   }
+  timerAlarmEnable(myTimer);
 }
 
 void endTimer(){
