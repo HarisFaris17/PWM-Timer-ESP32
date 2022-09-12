@@ -9,8 +9,11 @@ boolean change = true;
 
 void IRAM_ATTR onTimer(){
   digitalWrite(LED, !digitalRead(LED));
+  // whis used to detach interrupt functionallity to timer that specified by My_timer, in this case timer0.
   timerDetachInterrupt(My_timer);
+  // change will specify if the evoked onTimer should make the alarmValue to 6000000 or 1000000
   if(change){
+    // the timer0 specified in variable My_timer will be attached to interrupt, hence can call an alarm
     timerAttachInterrupt(My_timer, &onTimer, true);
     timerAlarmWrite(My_timer, 6000000, true);
     timerAlarmEnable(My_timer); //Just Enable
@@ -25,6 +28,7 @@ void IRAM_ATTR onTimer(){
 void setup() {
   Serial.begin(115200);
   pinMode(LED, OUTPUT);
+  // turn on the timer0
   My_timer = timerBegin(0, 80, true);
   timerAttachInterrupt(My_timer, &onTimer, true);
   timerAlarmWrite(My_timer, 1000000, true);
